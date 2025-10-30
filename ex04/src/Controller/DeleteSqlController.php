@@ -14,7 +14,6 @@ class DeleteSqlController extends AbstractController
     {
         $message = null;
 
-        // Si on clique sur "Créer la table"
         if (isset($_GET['create'])) {
             try {
                 $connection->executeStatement('

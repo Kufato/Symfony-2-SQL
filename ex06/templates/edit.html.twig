@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h2>Modifier l'utilisateur #{{ user.id }}</h2>
+
+    <form method="post">
+        <label>Nom :</label><br>
+        <input type="text" name="name" value="{{ user.name }}" maxlength="100" required><br><br>
+
+        <label>Email :</label><br>
+        <input type="email" name="email" value="{{ user.email }}" maxlength="150" required><br><br>
+
+        <button type="submit">Mettre à jour</button>
+    </form>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <button>
+        <a href="{{ path('ex06_list') }}">Retour à la liste</a>
+    </button>
+{% endblock %}

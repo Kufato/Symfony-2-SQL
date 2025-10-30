@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Ex06 - Modifcation des données avec SQL</h1>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <button>
+        <a href="?create=1" class="btn">Créer la table</a>
+    </button>
+        |
+    <button>
+        <a href="{{ path('ex06_form') }}">Ajouter un utilisateur</a>
+    </button>
+        |
+    <button>
+        <a href="{{ path('ex06_list') }}">Voir la liste</a>
+    </button>
+{% endblock %}
+
