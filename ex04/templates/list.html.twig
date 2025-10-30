@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Liste des utilisateurs</h1>
+
+    {% for msg in app.flashes('result') %}
+        <p>{{ msg }}</p>
+    {% endfor %}
+
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+
+    {% if users is empty %}
+        <p>Aucun utilisateur trouvé.</p>
+    {% else %}
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <a href="{{ path('ex04_delete', {'id': user.id}) }}" onclick="return confirm('Supprimer cet utilisateur ?')">Supprimer</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <br>
+    <button>
+        <a href="{{ path('ex04_form') }}">Ajouter un utilisateur</a>
+    </button>
+        |
+    <button>
+        <a href="{{ path('ex04_home') }}">Accueil</a>
+    </button>
+{% endblock %}
