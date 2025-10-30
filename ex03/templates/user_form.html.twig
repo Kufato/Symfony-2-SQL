@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un utilisateur{% endblock %}
+
+{% block content %}
+    <h1>Ajouter un utilisateur</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+    {{ form_end(form) }}
+
+    {% if message %}
+        <div class="alert alert-info mt-3">{{ message }}</div>
+    {% endif %}
+
+    <button>
+        <a href="{{ path('user_list') }}" class="btn btn-secondary mt-3 text-white text-decoration-none">Voir la liste des utilisateurs</a>
+    </button>
+{% endblock %}

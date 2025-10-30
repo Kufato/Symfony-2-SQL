@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des utilisateurs{% endblock %}
+
+{% block content %}
+    <h1>Liste des utilisateurs</h1>
+
+    {% if users is not empty %}
+        <table border="1" cellpadding="5">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Enable</th>
+                    <th>Birthdate</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.enable ? '✅' : '❌' }}</td>
+                        <td>{{ user.birthdate|date('Y-m-d') }}</td>
+                        <td>{{ user.address }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucun utilisateur trouvé.</p>
+    {% endif %}
+
+    <button>
+        <a href="{{ path('user_form') }}" class="btn btn-success mt-3">Ajouter un utilisateur</a>
+    </button>
+{% endblock %}

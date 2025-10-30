@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Table SQL{% endblock %}
+
+{% block content %}
+    <h1>Create Table SQL</h1>
+
+    <form method="post">
+        <button type="submit" name="create" class="btn btn-success">Créer la table</button>
+        <button type="submit" name="delete" class="btn btn-danger">Supprimer la table</button>
+    </form>
+
+    {% if message is defined %}
+        <p>{{ message }}</p>
+    {% endif %}
+{% endblock %}

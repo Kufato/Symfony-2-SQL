@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Table SQL{% endblock %}
+
+{% block content %}
+    <h1>Create Table SQL</h1>
+
+    <form method="post">
+        <button type="submit" name="create" class="btn btn-success">Créer la table</button>
+    </form>
+
+    <button>
+        <a href="{{ path('user_form') }}" class="btn btn-success">Ajouter un nouvel utilisateur</a>
+    </button>
+
+    {% if message is defined %}
+        <p>{{ message }}</p>
+    {% endif %}
+{% endblock %}
