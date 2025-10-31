@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Liste des utilisateurs</h1>
+
+    {% for msg in app.flashes('result') %}
+        <p>{{ msg }}</p>
+    {% endfor %}
+
+    {% if users is empty %}
+        <p>Aucun utilisateur trouvé.</p>
+    {% else %}
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <a href="{{ path('ex07_edit', {'id': user.id}) }}">Modifier</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <br>
+    <button>
+        <a href="{{ path('ex07_form') }}">Ajouter un utilisateur</a>
+    </button>
+        |
+    <button>
+        <a href="{{ path('ex07_home') }}">Accueil</a>
+    </button>
+{% endblock %}
