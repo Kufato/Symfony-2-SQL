@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Ex08 - Mise à jour des tables et création de relations </h1>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <div class="list-group my-4">
+        <button>
+            <a href="{{ path('ex08_home') }}?create_persons=1">
+                Créer la table persons
+            </a>
+        </button>
+        <br>
+        <button>
+            <a href="{{ path('ex08_home') }}?add_marital_status=1">
+                Ajouter la colonne marital_status
+            </a>
+        </button>
+        <br>
+        <button>
+            <a href="{{ path('ex08_home') }}?create_tables=1">
+                Créer les tables addresses & bank_accounts
+            </a>
+        </button>
+        <br>
+        <button>
+            <a href="{{ path('ex08_home') }}?create_relations=1">
+                Créer les relations entre tables
+            </a>
+        </button>
+        <br>
+        <button>
+            <a href="{{ path('ex08_form') }}">
+                Ajouter une entrée manuellement
+            </a>
+        </button>
+        <br>
+        <button>
+            <a href="{{ path('ex08_view') }}">
+                Voir la structure de la base
+            </a>
+        </button>
+    </div>
+{% endblock %}

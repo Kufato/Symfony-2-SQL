@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+<h1>Ajouter une personne + adresses + compte bancaire</h1>
+
+    {% if errors %}
+        <ul style="color:red;">
+            {% for e in errors %}
+                <li>{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form action="{{ path('ex08_form') }}" method="POST">
+
+        <h2>Personne</h2>
+
+        <label>Username :</label>
+        <input type="text" name="username" required value="{{ old.username ?? '' }}"><br>
+
+        <label>Nom complet :</label>
+        <input type="text" name="name" value="{{ old.name ?? '' }}"><br>
+
+        <label>Email :</label>
+        <input type="email" name="email" required value="{{ old.email ?? '' }}"><br>
+
+        <label>Actif :</label>
+        <input type="checkbox" name="enable" {% if old.enable ?? false %}checked{% endif %}><br>
+
+        <label>Date de naissance :</label>
+        <input type="date" name="birthdate" value="{{ old.birthdate ?? '' }}"><br>
+
+        <label>Statut marital :</label>
+        <select name="marital_status">
+            <option value="single">Célibataire</option>
+            <option value="married">Marié</option>
+            <option value="divorced">Divorcé</option>
+            <option value="widowed">Veuf</option>
+        </select>
+
+        <hr>
+
+        <h2>Adresse(s)</h2>
+
+        <div id="addresses">
+            <div class="addr">
+                <input type="text" name="addresses[]" required placeholder="Adresse...">
+            </div>
+        </div>
+
+        <button type="button" onclick="addAddress()">Ajouter une adresse</button>
+
+        <hr>
+
+        <h2>Compte bancaire (optionnel)</h2>
+        <label>IBAN :</label>
+        <input type="text" name="iban" placeholder="FR...">
+
+        <hr>
+
+        <button type="submit">Enregistrer</button>
+
+    </form>
+
+    <br><br>
+    <button>
+        <a href="{{ path('ex08_home') }}">Retour à l’accueil</a>
+    </button>
+
+    <script>
+    function addAddress() {
+        const div = document.createElement('div');
+        div.classList.add('addr');
+        div.innerHTML = '<input type="text" name="addresses[]" placeholder="Adresse..."> <button type="button" onclick="this.parentNode.remove()">Supprimer</button>';
+        document.getElementById('addresses').appendChild(div);
+    }
+    </script>
+
+{% endblock %}
