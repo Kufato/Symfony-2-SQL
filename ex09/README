@@ -1,0 +1,47 @@
+#########################################
+#               CREATION                #
+#########################################
+
+# 1. Créer un nouveau projet Symfony
+symfony new ex09 --webapp
+
+# 2. Aller dans le dossier du projet
+cd ex09
+
+# 3. Créer les entitées
+bin/console make:entity Person
+bin/console make:entity Address
+bin/console make:entity BankAccount
+
+# 4. Creer la BDD si elle n'existe pas
+bin/console doctrine:database:create
+
+# 5. Générer les migrations
+bin/console make:migration
+
+# 6. Exécuter les migrations
+bin/console doctrine:migrations:migrate
+
+# 7. Créer le contrôleur principal
+bin/console make:controller Ex09Controller
+
+
+#########################################
+#               EXECUTION               #
+#########################################
+
+# 1. Verifier si Composer a installer toutes les dependances
+composer install
+
+# 3. Verifier si la structure de la base correspond au entitees
+bin/console doctrine:schema:validate
+
+# 4. Nettoyer le cache
+bin/console cache:clear
+
+# 5. Verifier les routes
+bin/console debug:router
+
+# 6. Lancer le site (http://127.0.0.1:8000)
+symfony serve
+

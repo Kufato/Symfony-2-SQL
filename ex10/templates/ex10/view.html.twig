@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Données importées</h1>
+
+    <h2>SQL Table: sql_file_data</h2>
+    {% if sqlData is empty %}
+        <p>Aucune donnée</p>
+    {% else %}
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>ID</th>
+                <th>Filename</th>
+                <th>Content</th>
+            </tr>
+            {% for row in sqlData %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.filename }}</td>
+                    <td>{{ row.content|nl2br }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <h2>ORM Table: orm_file_data</h2>
+    {% if ormData is empty %}
+        <p>Aucune donnée</p>
+    {% else %}
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>ID</th>
+                <th>Filename</th>
+                <th>Content</th>
+            </tr>
+            {% for row in ormData %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.filename }}</td>
+                    <td>{{ row.content|nl2br }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <br>
+    <a href="{{ path('ex10_home') }}">Retour à l'accueil</a>
+{% endblock %}

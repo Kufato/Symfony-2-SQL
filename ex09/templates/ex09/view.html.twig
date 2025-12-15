@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Structure et données de la base de données</h1>
+
+    {% if tables is empty %}
+        <p>Aucune table trouvée.</p>
+    {% else %}
+        {% for table in tables %}
+            <h2>Table : {{ table }}</h2>
+
+            <h3>Structure :</h3>
+            <table border="1" cellpadding="5" style="margin-bottom: 10px;">
+                <tr>
+                    <th>Colonne</th>
+                    <th>Type</th>
+                    <th>Null</th>
+                    <th>Clé</th>
+                    <th>Défaut</th>
+                    <th>Extra</th>
+                </tr>
+                {% for col in structure[table] %}
+                    <tr>
+                        <td>{{ col.Field }}</td>
+                        <td>{{ col.Type }}</td>
+                        <td>{{ col.Null }}</td>
+                        <td>{{ col.Key }}</td>
+                        <td>{{ col.Default }}</td>
+                        <td>{{ col.Extra }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            {% if foreignKeys[table] is not empty %}
+                <h4>Relations :</h4>
+                <ul>
+                    {% for fk in foreignKeys[table] %}
+                        <li>{{ table }}.{{ fk.COLUMN_NAME }} → {{ fk.REFERENCED_TABLE_NAME }}.{{ fk.REFERENCED_COLUMN_NAME }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p><em>Aucune relation pour cette table.</em></p>
+            {% endif %}
+
+            <h3>Données :</h3>
+            {% if data[table] is empty %}
+                <p><em>Aucune donnée</em></p>
+            {% else %}
+                <table border="1" cellpadding="5" style="margin-bottom: 20px;">
+                    <tr>
+                        {% for col in structure[table] %}
+                            <th>{{ col.Field }}</th>
+                        {% endfor %}
+                    </tr>
+                    {% for row in data[table] %}
+                        <tr>
+                            {% for col in structure[table] %}
+                                <td>{{ row[col.Field] }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+
+            <hr>
+        {% endfor %}
+    {% endif %}
+
+    <br>
+    <button>
+        <a href="{{ path('ex09_home') }}">Retour à l'accueil</a>
+    </button>
+{% endblock %}

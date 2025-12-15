@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<h1>Ajouter une personne + adresses + compte bancaire (ORM)</h1>
+
+{% if message %}
+    <p style="color:green;">{{ message }}</p>
+{% endif %}
+
+<form method="POST">
+    <h3>Personne</h3>
+    <label>Username :</label><input name="username" required><br>
+    <label>Nom :</label><input name="name"><br>
+    <label>Email :</label><input name="email"><br>
+    <label>Actif :</label><input type="checkbox" name="enable"><br>
+    <label>Naissance :</label><input type="date" name="birthdate"><br>
+
+    <label>Marital :</label>
+    <select name="marital_status">
+        <option value="single">Célibataire</option>
+        <option value="married">Marié</option>
+        <option value="divorced">Divorcé</option>
+        <option value="widowed">Veuf</option>
+    </select>
+
+    <hr>
+    <h3>Adresse(s)</h3>
+
+    <div id="addresses">
+        <input name="addresses[]" placeholder="Adresse...">
+    </div>
+
+    <button type="button" onclick="addAddress()">Ajouter adresse</button>
+
+    <hr>
+    <h3>Compte bancaire</h3>
+    <input name="iban" placeholder="IBAN">
+
+    <hr>
+    <button type="submit">Enregistrer</button>
+</form>
+
+<button>
+    <a href="{{ path('ex09_home') }}">Retour à l’accueil</a>
+</button>
+
+<script>
+function addAddress() {
+    const d = document.createElement('div');
+    d.innerHTML = '<input name="addresses[]" placeholder="Adresse..."> <button onclick="this.parentNode.remove()">Supprimer</button>';
+    document.getElementById('addresses').appendChild(d);
+}
+</script>
+
+{% endblock %}

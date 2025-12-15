@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<h1>Ex10 - Import de fichier</h1>
+
+{% if message is defined %}
+    <p>{{ message }}</p>
+{% endif %}
+
+<div style="margin-top: 20px;">
+    <form action="{{ path('ex10_create_table') }}" method="post" style="display:inline-block; margin-right:10px;">
+        <button type="submit">Créer la table SQL</button>
+    </form>
+
+    <form action="{{ path('ex10_import') }}" method="get" style="display:inline-block;">
+        <button type="submit">Importer le fichier</button>
+    </form> 
+
+    <button><a href="{{ path('ex10_view') }}">Voir les données importées</a></button>
+
+</div>
+{% endblock %}
