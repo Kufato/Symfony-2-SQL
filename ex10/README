@@ -6,7 +6,7 @@
 symfony new ex10 --webapp
 
 # 2. Aller dans le dossier du projet
-cd ex09
+cd ex10
 
 # 3. Créer les entitées
 bin/console make:entity OrmFileData
