@@ -3,14 +3,14 @@
 {% block content %}
     <h1>Ex11 - Gestion des tables</h1>
 
-    <a href="?create_category=1">Créer la table Category</a><br>
-    <a href="?create_product=1">Créer la table Product</a><br>
+    <button><a href="?create_category=1">Créer la table Category</a></button>
+    <button><a href="?create_product=1">Créer la table Product</a></button>
 
     {% if message %}
         <p>{{ message|raw }}</p>
     {% endif %}
 
     <hr>
-    <a href="{{ path('ex11_add') }}">Ajouter un produit</a><br>
-    <a href="{{ path('ex11_view') }}">Voir les produits</a>
+    <button><a href="{{ path('ex11_add') }}">Ajouter un produit</a></button>
+    <button><a href="{{ path('ex11_view') }}">Voir les produits</a></button>
 {% endblock %}

@@ -5,7 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     use Symfony\Component\HttpFoundation\Response;
     use Symfony\Component\HttpFoundation\Request;
-    use Symfony\Component\Routing\Annotation\Route;
+    use Symfony\Component\Routing\Attribute\Route;
     use Doctrine\DBAL\Connection;
 
     final class Ex11Controller extends AbstractController
@@ -27,7 +27,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
                     $count = $conn->fetchOne("SELECT COUNT(*) FROM category");
                     if ($count == 0) {
-                        $categories = ['Frais', 'Surgelé', 'Parapharmacie'];
+                        $categories = ['Frais', 'Pas frais', 'electronique'];
                         foreach ($categories as $name) {
                             $conn->insert('category', ['name' => $name]);
                         }
@@ -75,16 +75,46 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
             $expiry_date = $request->request->get('expiry_date');
             $category_id = $request->request->get('category_id');
 
-            try {
-                $conn->insert('product', [
-                    'name' => $name,
-                    'price' => $price,
-                    'expiry_date' => $expiry_date,
-                    'category_id' => $category_id
-                ]);
-                $message = "✅ Produit ajouté !";
-            } catch (\Exception $e) {
-                $message = "❌ Erreur : " . $e->getMessage();
+            // Récupérer le nom de la catégorie
+            $category = $conn->fetchAssociative(
+                "SELECT name FROM category WHERE id = ?",
+                [$category_id]
+            );
+
+            $today = new \DateTime('today');
+
+            // LOGIQUE MÉTIER
+            if ($category['name'] !== 'electronique') {
+
+                // Date obligatoire
+                if (empty($expiry_date)) {
+                    $message = "❌ La date de péremption est obligatoire pour cette catégorie.";
+                } else {
+                    $expiryDateObj = new \DateTime($expiry_date);
+
+                    if ($expiryDateObj < $today) {
+                        $message = "❌ La date de péremption ne peut pas être antérieure à aujourd'hui.";
+                    }
+                }
+
+            } else {
+                // Électronique → pas de date
+                $expiry_date = null;
+            }
+
+            // INSERT seulement si aucune erreur
+            if ($message === '') {
+                try {
+                    $conn->insert('product', [
+                        'name' => $name,
+                        'price' => $price,
+                        'expiry_date' => $expiry_date,
+                        'category_id' => $category_id
+                    ]);
+                    $message = "✅ Produit ajouté !";
+                } catch (\Exception $e) {
+                    $message = "❌ Erreur SQL : " . $e->getMessage();
+                }
             }
         }
 
@@ -98,25 +128,29 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     public function view(Request $request, Connection $conn): Response
     {
         $category_id = $request->query->get('category');
-        $sort = $request->query->get('sort', 'name'); // name par défaut
+        $sort = $request->query->get('sort', 'name');
         $order = strtoupper($request->query->get('order', 'ASC'));
-
-        // Sécurité : whitelist des colonnes et ordre
         $allowedSort = ['name', 'price', 'expiry_date'];
-        if (!in_array($sort, $allowedSort)) $sort = 'name';
-        $order = $order === 'DESC' ? 'DESC' : 'ASC';
+        
+        if (!in_array($sort, $allowedSort)) {
+            $sort = 'name';
+        }
 
-        $sql = "SELECT p.*, c.name as category_name 
-                FROM product p
-                JOIN category c ON p.category_id = c.id";
+        $order = $order === 'DESC' ? 'DESC' : 'ASC';
+        $sql = "
+            SELECT p.*, c.name AS category_name
+            FROM product p
+            JOIN category c ON p.category_id = c.id
+        ";
         $params = [];
+
         if ($category_id) {
             $sql .= " WHERE c.id = ?";
             $params[] = $category_id;
         }
-        $sql .= " ORDER BY $sort $order";
 
-        $products = $conn->fetchAllAssociative($sql);
+        $sql .= " ORDER BY $sort $order";
+        $products = $conn->fetchAllAssociative($sql, $params);
         $categories = $conn->fetchAllAssociative("SELECT * FROM category");
 
         return $this->render('ex11/view.html.twig', [
@@ -127,5 +161,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
             'order' => $order
         ]);
     }
+
 }
 
