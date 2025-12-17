@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<h1>Ajouter un produit</h1>
+
+{% if message %}
+    <p>{{ message }}</p>
+{% endif %}
+
+<form method="post">
+    Nom: <input type="text" name="name" required><br>
+    Prix: <input type="number" step="0.01" name="price" required><br>
+
+    Date de péremption:
+    <input type="date" name="expiry_date" id="expiry_date"><br>
+
+    Catégorie:
+    <select name="category_id" id="category" required>
+        {% for cat in categories %}
+            <option value="{{ cat.id }}" data-name="{{ cat.name|lower }}">
+                {{ cat.name }}
+            </option>
+        {% endfor %}
+    </select><br>
+
+    <button type="submit">Ajouter</button>
+</form>
+ 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const categorySelect = document.getElementById('category');
+        const expiryInput = document.getElementById('expiry_date');
+
+        function toggleDate() {
+            const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+            const categoryName = selectedOption.dataset.name;
+
+            if (categoryName === 'electronique') {
+                expiryInput.value = '';
+                expiryInput.disabled = true;
+                expiryInput.removeAttribute('required');
+            } else {
+                expiryInput.disabled = false;
+                expiryInput.setAttribute('required', 'required');
+            }
+        }
+
+        categorySelect.addEventListener('change', toggleDate);
+        toggleDate(); // appel initial
+    });
+</script>
+
+<button><a href="{{ path('ex12_home') }}">Retour au menu</a></button>
+
+{% endblock %}

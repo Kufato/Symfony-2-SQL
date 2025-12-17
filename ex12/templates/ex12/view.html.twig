@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<h1>Liste des produits</h1>
+
+{# FILTRES & TRI #}
+<form method="get" style="margin-bottom:20px;">
+    <label>
+        Catégorie :
+        <select name="category">
+            <option value="">Toutes</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}"
+                    {% if cat.id == selectedCategory %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label>
+        Trier par :
+        <select name="sort">
+            <option value="name" {% if sort == 'name' %}selected{% endif %}>Nom</option>
+            <option value="price" {% if sort == 'price' %}selected{% endif %}>Prix</option>
+            <option value="expiryDate" {% if sort == 'expiryDate' %}selected{% endif %}>
+                Date de péremption
+            </option>
+        </select>
+    </label>
+
+    <label>
+        Ordre :
+        <select name="order">
+            <option value="ASC" {% if order == 'ASC' %}selected{% endif %}>ASC</option>
+            <option value="DESC" {% if order == 'DESC' %}selected{% endif %}>DESC</option>
+        </select>
+    </label>
+
+    <button type="submit">Appliquer</button>
+</form>
+
+{# TABLE PRODUITS #}
+<table border="1" cellpadding="6" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>
+                <a href="{{ path('ex12_view', {
+                    category: selectedCategory,
+                    sort: 'name',
+                    order: sort == 'name' and order == 'ASC' ? 'DESC' : 'ASC'
+                }) }}">
+                    Nom
+                </a>
+            </th>
+
+            <th>
+                <a href="{{ path('ex12_view', {
+                    category: selectedCategory,
+                    sort: 'price',
+                    order: sort == 'price' and order == 'ASC' ? 'DESC' : 'ASC'
+                }) }}">
+                    Prix
+                </a>
+            </th>
+
+            <th>
+                <a href="{{ path('ex12_view', {
+                    category: selectedCategory,
+                    sort: 'expiryDate',
+                    order: sort == 'expiryDate' and order == 'ASC' ? 'DESC' : 'ASC'
+                }) }}">
+                    Date de péremption
+                </a>
+            </th>
+
+            <th>Catégorie</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% if products is empty %}
+            <tr>
+                <td colspan="4" style="text-align:center;">Aucun produit trouvé</td>
+            </tr>
+        {% else %}
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.price }} €</td>
+                    <td>
+                        {% if product.expiryDate %}
+                            {{ product.expiryDate|date('Y-m-d') }}
+                        {% else %}
+                            <em>Non périssable</em>
+                        {% endif %}
+                    </td>
+                    <td>{{ product.category.name }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
+<button><a href="{{ path('ex12_home') }}">Retour au menu</a></button>
+
+{% endblock %}
