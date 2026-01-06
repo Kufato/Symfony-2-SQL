@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<h2>Ajouter un employé</h2>
+
+{% if message %}
+    <p><strong>{{ message }}</strong></p>
+{% endif %}
+
+<form method="post">
+
+    <label>
+        Prénom<br>
+        <input type="text" name="firstname" required>
+    </label><br><br>
+
+    <label>
+        Nom<br>
+        <input type="text" name="lastname" required>
+    </label><br><br>
+
+    <label>
+        Email<br>
+        <input type="email" name="email" required>
+    </label><br><br>
+
+    <label>
+        Date de naissance<br>
+        <input type="date" name="birthdate" required>
+    </label><br><br>
+
+    <label>
+        Employé depuis le<br>
+        <input type="date" name="employed_since" required>
+    </label><br><br>
+
+    <label>
+        Employé jusqu’au<br>
+        <input type="date" name="employed_until">
+    </label><br><br>
+
+    <label>
+        Régime de travail<br>
+        <select name="hours" required>
+            <option value="8">8 heures</option>
+            <option value="6">6 heures</option>
+            <option value="4">4 heures</option>
+        </select>
+    </label><br><br>
+
+    <label>
+        Poste occupé<br>
+        <select name="position" required>
+            {% set positions = {
+                'manager':'Manager',
+                'account_manager':'Account Manager',
+                'qa_manager':'QA Manager',
+                'dev_manager':'Dev Manager',
+                'ceo':'CEO',
+                'coo':'COO',
+                'backend_dev':'Backend Developer',
+                'frontend_dev':'Frontend Developer',
+                'qa_tester':'QA Tester'
+            } %}
+
+            {% for key,label in positions %}
+                {% if isFirstEmployee and key != 'ceo' %}
+                    {# premier employé : seul CEO autorisé #}
+                {% elseif not isFirstEmployee and key == 'ceo' %}
+                    {# CEO déjà existant : interdit #}
+                {% else %}
+                    <option value="{{ key }}">{{ label }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </label><br><br>
+
+    <label>
+        Salaire (€)<br>
+        <input type="number" name="salary" required>
+    </label><br><br>
+
+    <label>
+        <input type="checkbox" name="active" value="1" checked>
+        Employé actif
+    </label><br><br>
+
+    {% if not isFirstEmployee %}
+        <label>
+            Responsable hiérarchique<br>
+            <select name="manager_id" required>
+                <option value="">-- Sélectionner un manager --</option>
+                {% for e in employees %}
+                    <option value="{{ e.id }}">
+                        {{ e.firstname }} {{ e.lastname }} ({{ e.position }})
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br><br>
+    {% else %}
+        <p><em>ℹ️ Le CEO n’a pas de responsable hiérarchique.</em></p>
+    {% endif %}
+
+    <button type="submit">✅ Valider</button>
+</form>
+
+<br>
+
+<a href="{{ path('ex13_home') }}">
+    <button type="button">⬅ Retour</button>
+</a>
+
+{% endblock %}

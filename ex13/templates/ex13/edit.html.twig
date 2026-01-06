@@ -1,0 +1,152 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<h2>Modifier / Visualiser un employé</h2>
+
+{% if message %}
+    <p><strong>{{ message }}</strong></p>
+{% endif %}
+
+<form method="post">
+
+    <fieldset>
+        <legend><strong>Informations personnelles</strong></legend>
+
+        <label>
+            Prénom<br>
+            <input type="text" name="firstname" value="{{ employee.firstname }}" required>
+        </label><br><br>
+
+        <label>
+            Nom<br>
+            <input type="text" name="lastname" value="{{ employee.lastname }}" required>
+        </label><br><br>
+
+        <label>
+            Email<br>
+            <input type="email" name="email" value="{{ employee.email }}" required>
+        </label><br><br>
+
+        <label>
+            Date de naissance<br>
+            <input type="date" name="birthdate"
+                   value="{{ employee.birthdate|date('Y-m-d') }}" required>
+        </label>
+    </fieldset>
+
+    <br>
+
+    <fieldset>
+        <legend><strong>Informations professionnelles</strong></legend>
+
+        <label>
+            Employé depuis le<br>
+            <input type="date" name="employed_since"
+                   value="{{ employee.employedSince|date('Y-m-d') }}" required>
+        </label><br><br>
+
+        <label>
+            Employé jusqu’au<br>
+            <input type="date" name="employed_until"
+                   value="{{ employee.employedUntil ? employee.employedUntil|date('Y-m-d') : '' }}">
+        </label><br><br>
+
+        <label>
+            Régime de travail<br>
+            <select name="hours">
+                {% for h in ['8','6','4'] %}
+                    <option value="{{ h }}" {{ employee.hours == h ? 'selected' : '' }}>
+                        {{ h }} heures
+                    </option>
+                {% endfor %}
+            </select>
+        </label><br><br>
+
+        <label>
+            Poste occupé<br>
+            <select name="position" {{ employee.position == 'ceo' ? 'disabled' : '' }}>
+                {% set positions = {
+                    'manager':'Manager',
+                    'account_manager':'Account Manager',
+                    'qa_manager':'QA Manager',
+                    'dev_manager':'Dev Manager',
+                    'ceo':'CEO',
+                    'coo':'COO',
+                    'backend_dev':'Backend Dev',
+                    'frontend_dev':'Frontend Dev',
+                    'qa_tester':'QA Tester'
+                } %}
+
+                {% for key,label in positions %}
+                    {% if employee.position == 'ceo' and key != 'ceo' %}
+                        {# CEO figé #}
+                    {% elseif employee.position != 'ceo' and key == 'ceo' %}
+                        {# CEO unique #}
+                    {% else %}
+                        <option value="{{ key }}" {{ employee.position == key ? 'selected' : '' }}>
+                            {{ label }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </label><br><br>
+
+        <label>
+            Salaire (€)<br>
+            <input type="number" name="salary" value="{{ employee.salary }}" required>
+        </label><br><br>
+
+        <label>
+            <input type="checkbox" name="active" value="1"
+                   {{ employee.active ? 'checked' : '' }}>
+            Employé actif
+        </label><br><br>
+
+        {% if employee.position != 'ceo' %}
+            <label>
+                Responsable hiérarchique<br>
+                <select name="manager_id" required>
+                    {% for e in employees %}
+                        {% if e.id != employee.id %}
+                            <option value="{{ e.id }}"
+                                {{ employee.manager and employee.manager.id == e.id ? 'selected' : '' }}>
+                                {{ e.firstname }} {{ e.lastname }} ({{ e.position }})
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </label>
+        {% else %}
+            <p><em>ℹ️ Le CEO n’a pas de responsable hiérarchique.</em></p>
+        {% endif %}
+    </fieldset>
+
+    <br>
+
+    <button type="submit">💾 Enregistrer</button>
+</form>
+
+<br>
+
+<a href="{{ path('ex13_home') }}">
+    <button type="button">⬅ Retour</button>
+</a>
+
+<hr>
+
+<h3>📊 Aperçu base de données</h3>
+
+<ul>
+    <li><strong>ID :</strong> {{ employee.id }}</li>
+    <li><strong>Nom :</strong> {{ employee.firstname }} {{ employee.lastname }}</li>
+    <li><strong>Email :</strong> {{ employee.email }}</li>
+    <li><strong>Poste :</strong> {{ employee.position }}</li>
+    <li><strong>Heures :</strong> {{ employee.hours }}h</li>
+    <li><strong>Salaire :</strong> {{ employee.salary }} €</li>
+    <li><strong>Actif :</strong> {{ employee.active ? 'Oui' : 'Non' }}</li>
+    <li><strong>Manager :</strong>
+        {{ employee.manager ? employee.manager.firstname ~ ' ' ~ employee.manager.lastname : 'Aucun' }}
+    </li>
+</ul>
+
+{% endblock %}
