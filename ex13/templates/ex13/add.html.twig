@@ -65,9 +65,9 @@
 
             {% for key,label in positions %}
                 {% if isFirstEmployee and key != 'ceo' %}
-                    {# premier employé : seul CEO autorisé #}
+                    {# Premier employé : seul CEO autorisé #}
                 {% elseif not isFirstEmployee and key == 'ceo' %}
-                    {# CEO déjà existant : interdit #}
+                    {# CEO déjà créé, on ne peut plus le choisir #}
                 {% else %}
                     <option value="{{ key }}">{{ label }}</option>
                 {% endif %}

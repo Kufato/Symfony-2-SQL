@@ -21,7 +21,7 @@ class Ex13Controller extends AbstractController
         ]);
     }
 
-   #[Route('/ex13/add', name: 'ex13_add')]
+    #[Route('/ex13/add', name: 'ex13_add')]
     public function add(Request $request, EntityManagerInterface $em): Response
     {
         $message = '';
@@ -34,45 +34,67 @@ class Ex13Controller extends AbstractController
 
         if ($request->isMethod('POST')) {
             try {
+                $firstname = $request->request->get('firstname');
+                $lastname = $request->request->get('lastname');
                 $position = $request->request->get('position');
+                $birthdate = new \DateTime($request->request->get('birthdate'));
+                $employedSince = new \DateTime($request->request->get('employed_since'));
+                $employedUntil = $request->request->get('employed_until')
+                    ? new \DateTime($request->request->get('employed_until'))
+                    : null;
 
-                // ✅ Premier employé = CEO obligatoire
+                $today = new \DateTime('today');
+
+                // 🔒 Vérification unicité prénom + nom
+                $existing = $employeeRepo->findOneBy(['firstname' => $firstname, 'lastname' => $lastname]);
+                if ($existing) {
+                    throw new \Exception('Un employé avec ce prénom et ce nom existe déjà');
+                }
+
+                // 🔒 Premier employé = CEO obligatoire
                 if ($isFirstEmployee && $position !== 'ceo') {
                     throw new \Exception('Le premier employé doit être le CEO');
                 }
 
-                // ❌ Un seul CEO autorisé
+                // 🔒 Un seul CEO
                 if (!$isFirstEmployee && $position === 'ceo') {
                     throw new \Exception('Il ne peut y avoir qu’un seul CEO');
                 }
 
-                $employee = new Employee();
-                $employee->setFirstname($request->request->get('firstname'));
-                $employee->setLastname($request->request->get('lastname'));
-                $employee->setEmail($request->request->get('email'));
-                $employee->setBirthdate(new \DateTime($request->request->get('birthdate')));
-                $employee->setEmployedSince(new \DateTime($request->request->get('employed_since')));
-                $employee->setEmployedUntil(
-                    $request->request->get('employed_until')
-                        ? new \DateTime($request->request->get('employed_until'))
-                        : null
-                );
-                $employee->setHours($request->request->get('hours'));
-                $employee->setSalary((int)$request->request->get('salary'));
-                $employee->setPosition($position);
-                $employee->setActive($request->request->get('active') === '1');
+                // 🔒 Dates cohérentes
+                if ($birthdate > $today) {
+                    throw new \Exception('La date de naissance ne peut pas être dans le futur');
+                }
+                if ($birthdate >= $employedSince) {
+                    throw new \Exception('La date de naissance doit être antérieure à la date d’embauche');
+                }
+                if ($employedUntil && $employedUntil < $employedSince) {
+                    throw new \Exception('La date de fin doit être postérieure ou égale à la date de début');
+                }
 
-                // 👑 CEO sans manager
+                // Création de l'employé
+                $employee = new Employee();
+                $employee
+                    ->setFirstname($firstname)
+                    ->setLastname($lastname)
+                    ->setEmail($request->request->get('email'))
+                    ->setBirthdate($birthdate)
+                    ->setEmployedSince($employedSince)
+                    ->setEmployedUntil($employedUntil)
+                    ->setHours($request->request->get('hours'))
+                    ->setSalary((int)$request->request->get('salary'))
+                    ->setPosition($position)
+                    ->setActive($request->request->get('active') === '1');
+
+                // Gestion du manager
                 if ($position === 'ceo') {
                     $employee->setManager(null);
                 } else {
                     $managerId = $request->request->get('manager_id');
                     $manager = $employeeRepo->find($managerId);
-
                     if (!$manager) {
                         throw new \Exception('Un manager valide est obligatoire');
                     }
-
                     $employee->setManager($manager);
                 }
 
@@ -80,6 +102,11 @@ class Ex13Controller extends AbstractController
                 $em->flush();
 
                 $message = '✅ Employé ajouté avec succès';
+
+                // 🔄 Recharge pour mise à jour du template
+                $employees = $employeeRepo->findAll();
+                $ceo = $employeeRepo->findOneBy(['position' => 'ceo']);
+                $isFirstEmployee = count($employees) === 1;
 
             } catch (\Exception $e) {
                 $message = '❌ ' . $e->getMessage();
@@ -94,51 +121,66 @@ class Ex13Controller extends AbstractController
     }
 
     #[Route('/ex13/edit/{id}', name: 'ex13_edit')]
-    public function edit(
-        ?Employee $employee,
-        Request $request,
-        EntityManagerInterface $em
-    ): Response {
+    public function edit(?Employee $employee, Request $request, EntityManagerInterface $em): Response
+    {
         if (!$employee) {
             $this->addFlash('error', 'Employé introuvable');
             return $this->redirectToRoute('ex13_home');
         }
 
         $message = '';
-
         $repo = $em->getRepository(Employee::class);
         $employees = $repo->findAll();
 
         if ($request->isMethod('POST')) {
             try {
+                $firstname = $request->request->get('firstname');
+                $lastname = $request->request->get('lastname');
                 $position = $request->request->get('position');
+                $employedSince = new \DateTime($request->request->get('employed_since'));
+                $employedUntil = $request->request->get('employed_until')
+                    ? new \DateTime($request->request->get('employed_until'))
+                    : null;
+
+                $today = new \DateTime('today');
+                $birthdate = $employee->getBirthdate();
+
+                // 🔒 Unicité prénom + nom (sauf si c'est le même employé)
+                $existing = $repo->findOneBy(['firstname' => $firstname, 'lastname' => $lastname]);
+                if ($existing && $existing->getId() !== $employee->getId()) {
+                    throw new \Exception('Un employé avec ce prénom et ce nom existe déjà');
+                }
+
+                // 🔒 Birthdate et dates cohérentes
+                if ($birthdate > $today) {
+                    throw new \Exception('La date de naissance est invalide');
+                }
+                if ($birthdate >= $employedSince) {
+                    throw new \Exception('La date de naissance doit être antérieure à la date d’embauche');
+                }
+                if ($employedUntil && $employedUntil < $employedSince) {
+                    throw new \Exception('La date de fin doit être postérieure ou égale à la date de début');
+                }
 
                 // 🔒 Le CEO reste CEO
                 if ($employee->getPosition() === 'ceo' && $position !== 'ceo') {
                     throw new \Exception('Le CEO ne peut pas changer de poste');
                 }
-
-                // 🔒 Un seul CEO
                 if ($employee->getPosition() !== 'ceo' && $position === 'ceo') {
                     throw new \Exception('Il existe déjà un CEO');
                 }
 
+                // Mise à jour
                 $employee
-                    ->setFirstname($request->request->get('firstname'))
-                    ->setLastname($request->request->get('lastname'))
+                    ->setFirstname($firstname)
+                    ->setLastname($lastname)
                     ->setEmail($request->request->get('email'))
-                    ->setBirthdate(new \DateTime($request->request->get('birthdate')))
-                    ->setEmployedSince(new \DateTime($request->request->get('employed_since')))
-                    ->setEmployedUntil(
-                        $request->request->get('employed_until')
-                            ? new \DateTime($request->request->get('employed_until'))
-                            : null
-                    )
+                    ->setEmployedSince($employedSince)
+                    ->setEmployedUntil($employedUntil)
                     ->setHours($request->request->get('hours'))
                     ->setSalary((int)$request->request->get('salary'))
                     ->setActive($request->request->get('active') === '1');
 
-                // 👑 Cas CEO
                 if ($employee->getPosition() === 'ceo') {
                     $employee->setPosition('ceo');
                     $employee->setManager(null);
@@ -151,7 +193,6 @@ class Ex13Controller extends AbstractController
                     if (!$manager) {
                         throw new \Exception('Manager invalide');
                     }
-
                     if ($manager->getId() === $employee->getId()) {
                         throw new \Exception('Un employé ne peut pas être son propre manager');
                     }
@@ -174,12 +215,16 @@ class Ex13Controller extends AbstractController
         ]);
     }
 
-
     #[Route('/ex13/delete/{id}', name: 'ex13_delete')]
     public function delete(?Employee $employee, EntityManagerInterface $em): Response
     {
         if (!$employee) {
             $this->addFlash('error', 'Employé introuvable');
+            return $this->redirectToRoute('ex13_home');
+        }
+
+        if ($employee->getPosition() === 'ceo') {
+            $this->addFlash('error', 'Impossible de supprimer le CEO');
             return $this->redirectToRoute('ex13_home');
         }
 
