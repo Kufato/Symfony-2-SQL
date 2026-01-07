@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ex14 – SQL Injection{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #333; padding: 0.5rem; text-align: left; }
+        th { background: #eee; }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <h2>Ex14 – SQL Injection Demo</h2>
+
+    {% if tableExists %}
+        <p style="color: green;">✅ Table exists</p>
+    {% else %}
+        <p style="color: red;">❌ Table does not exist</p>
+        <button><a href="{{ path('ex14_create_table') }}">Create table</a></button>
+    {% endif %}
+    <hr>
+
+    <h3>Add user (VULNERABLE)</h3>
+
+    <form method="post" action="{{ path('ex14_add') }}" id="vulnerable-form">
+        <div>
+            <label>Username</label><br>
+            <input type="text" name="username" id="username">
+        </div>
+
+        <div style="margin-top:1rem;">
+            <label>Password</label><br>
+            <input type="text" name="password" id="password">
+        </div>
+
+        <div style="margin-top:1rem;">
+            <button type="submit">Submit (normal)</button>
+
+            <button type="button"
+                    id="inject-btn"
+                    style="margin-left:1rem; background:#c0392b; color:white;">
+                    💣 Lancer l’injection SQL
+            </button>
+        </div>
+    </form>
+    <hr>
+
+    <h3>Database content</h3>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Password</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.password }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">No data</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/injection.js') }}"></script>
+{% endblock %}
