@@ -9,9 +9,8 @@
         <button type="submit" name="create" class="btn btn-success">Créer la table</button>
     </form>
 
-    <button>
-        <a href="{{ path('user_form') }}" class="btn btn-success">Ajouter un nouvel utilisateur</a>
-    </button>
+    <button><a href="{{ path('user_form') }}" class="btn btn-success">Ajouter un nouvel utilisateur</a></button>
+    <button><a href="{{ path('user_list') }}" class="btn btn-primary mt-3">Voir la liste des utilisateurs</a></button>
 
     {% if message is defined %}
         <p>{{ message }}</p>

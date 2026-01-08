@@ -64,7 +64,13 @@ class UserOrmController extends AbstractController
                 try {
                     $em->persist($user);
                     $em->flush();
+
                     $message = "✅ Utilisateur ajouté avec succès.";
+
+                    // 🔥 Reset du formulaire
+                    $user = new User();
+                    $form = $this->createForm(UserType::class, $user);
+
                 } catch (\Exception $e) {
                     $message = "❌ Erreur lors de l'insertion : " . $e->getMessage();
                 }

@@ -4,7 +4,10 @@
     <h1>Liste des utilisateurs</h1>
 
     {% for msg in app.flashes('result') %}
-        <p>{{ msg }}</p>
+        <div class="alert alert-success">{{ msg }}</div>
+    {% endfor %}
+    {% for msg in app.flashes('error') %}
+        <div class="alert alert-danger">{{ msg }}</div>
     {% endfor %}
 
     {% if error %}

@@ -3,8 +3,15 @@
 {% block content %}
     <h1>Modifier un utilisateur</h1>
 
+    {% for msg in app.flashes('result') %}
+        <div class="alert alert-success">{{ msg }}</div>
+    {% endfor %}
+    {% for msg in app.flashes('error') %}
+        <div class="alert alert-danger">{{ msg }}</div>
+    {% endfor %}
+
     {% if message %}
-        <p>{{ message }}</p>
+        <div class="alert alert-warning">{{ message }}</div>
     {% endif %}
 
     <form method="post">
@@ -18,7 +25,5 @@
     </form>
 
     <br>
-    <button>
-        <a href="{{ path('ex07_list') }}">Retour à la liste</a>
-    </button>
+    <button><a href="{{ path('ex07_list') }}">Retour à la liste</a></button>
 {% endblock %}

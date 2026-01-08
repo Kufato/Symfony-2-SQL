@@ -36,7 +36,8 @@
         <p>Aucun utilisateur trouvé.</p>
     {% endif %}
 
-    <button>
-        <a href="{{ path('user_form') }}" class="btn btn-success mt-3">Ajouter un utilisateur</a>
-    </button>
+    
+    <button><a href="{{ path('user_form') }}" class="btn btn-success mt-3">Ajouter un utilisateur</a></button>
+    <button><a href="{{ path('create_table') }}" class="btn btn-success mt-3">Home</a></button>
+
 {% endblock %}

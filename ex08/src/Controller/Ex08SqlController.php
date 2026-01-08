@@ -15,10 +15,6 @@ class Ex08SqlController extends AbstractController
     {
         $message = null;
 
-        /*
-        Create the persons table if it does not already exist.
-        This table will act as the main reference for all relations.
-        */
         if (isset($_GET['create_persons'])) {
             try {
                 $connection->executeStatement("
@@ -39,10 +35,6 @@ class Ex08SqlController extends AbstractController
             }
         }
 
-        /*
-        Add the marital_status column only if it does not already exist.
-        This avoids SQL errors when clicking the button multiple times.
-        */
         if (isset($_GET['add_marital_status'])) {
             try {
                 $exists = $connection->fetchOne("
@@ -66,15 +58,9 @@ class Ex08SqlController extends AbstractController
             }
         }
 
-        /*
-        Create the secondary tables:
-        - addresses : one-to-many relation with persons
-        - bank_accounts : one-to-one relation with persons
-        */
         if (isset($_GET['create_tables'])) {
             $errors = [];
 
-            // Create the addresses table
             try {
                 $connection->executeStatement("
                     CREATE TABLE IF NOT EXISTS addresses (
@@ -88,7 +74,6 @@ class Ex08SqlController extends AbstractController
                 $errors[] = $e->getMessage();
             }
 
-            // Create the bank_accounts table
             try {
                 $connection->executeStatement("
                     CREATE TABLE IF NOT EXISTS bank_accounts (
@@ -107,16 +92,9 @@ class Ex08SqlController extends AbstractController
                 : "❌ Errors: " . implode(" | ", $errors);
         }
 
-        /*
-        Add foreign key relations:
-        - persons → addresses : one-to-many
-        - persons → bank_accounts : one-to-one (requires UNIQUE constraint)
-        Uses checks to avoid duplicate FK errors.
-        */
         if (isset($_GET['create_relations'])) {
             $errors = [];
 
-            // One-to-many: persons → addresses
             try {
                 $fkExists = $connection->fetchOne("
                     SELECT COUNT(*) FROM information_schema.REFERENTIAL_CONSTRAINTS
@@ -136,7 +114,6 @@ class Ex08SqlController extends AbstractController
                 $errors[] = $e->getMessage();
             }
 
-            // One-to-one: persons → bank_accounts (FK)
             try {
                 $fkExists = $connection->fetchOne("
                     SELECT COUNT(*) FROM information_schema.REFERENTIAL_CONSTRAINTS
@@ -156,8 +133,6 @@ class Ex08SqlController extends AbstractController
                 $errors[] = $e->getMessage();
             }
 
-            // One-to-one: enforce unique constraint on bank_accounts.person_id
-            // This guarantees that a person can have at most one bank account.
             try {
                 $uniqueExists = $connection->fetchOne("
                     SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
@@ -187,15 +162,7 @@ class Ex08SqlController extends AbstractController
         ]);
     }
 
-    /*
-    Handle the form for adding a new person with related data.
-    Validations:
-    - At least one address is required.
-    - Username and email must be unique in persons table.
-    - If provided, IBAN must be unique in bank_accounts table.
-    On successful submission, inserts data into persons, addresses, and bank_accounts tables.
-    */
-    #[Route('/ex08/form', name: 'ex08_form', methods: ['GET', 'POST'])]
+   #[Route('/ex08/form', name: 'ex08_form', methods: ['GET', 'POST'])]
     public function form(Request $request, Connection $connection): Response
     {
         $message = null;
@@ -221,12 +188,33 @@ class Ex08SqlController extends AbstractController
                 $errors[] = "Le username existe déjà.";
             }
 
+            if ($connection->fetchOne("SELECT COUNT(*) FROM persons WHERE name = ?", [$name]) > 0) {
+                $errors[] = "Le nom existe déjà.";
+            }
+
             if ($connection->fetchOne("SELECT COUNT(*) FROM persons WHERE email = ?", [$email]) > 0) {
                 $errors[] = "L'email existe déjà.";
             }
 
-            if ($iban && $connection->fetchOne("SELECT COUNT(*) FROM bank_accounts WHERE iban = ?", [$iban]) > 0) {
-                $errors[] = "Cet IBAN est déjà utilisé.";
+            if (!empty($birthdate)) {
+                $birthDateObj = \DateTime::createFromFormat('Y-m-d', $birthdate);
+                if (!$birthDateObj) {
+                    $errors[] = "La date de naissance est invalide.";
+                } elseif ($birthDateObj > new \DateTime('today')) {
+                    $errors[] = "La date de naissance doit être antérieure ou égale à aujourd'hui.";
+                }
+            }
+
+            if ($iban) {
+                if (strlen($iban) < 27) {
+                    $errors[] = "L'IBAN doit faire au moins 27 caractères.";
+                }
+                if (substr($iban, 0, 2) !== "FR") {
+                    $errors[] = "L'IBAN doit commencer par 'FR'.";
+                }
+                if ($connection->fetchOne("SELECT COUNT(*) FROM bank_accounts WHERE iban = ?", [$iban]) > 0) {
+                    $errors[] = "Cet IBAN est déjà utilisé.";
+                }
             }
 
             if (!empty($errors)) {
@@ -269,10 +257,6 @@ class Ex08SqlController extends AbstractController
         ]);
     }
 
-
-    /*
-    View the current datas, structures and relations.
-    */
     #[Route('/ex08/view', name: 'ex08_view')]
     public function view(Connection $connection): Response
     {

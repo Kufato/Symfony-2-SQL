@@ -15,7 +15,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
         {
             $message = '';
 
-            // Création table category + insertion catégories
             if ($request->query->get('create_category')) {
                 try {
                     $conn->executeStatement("
@@ -39,7 +38,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
                 }
             }
 
-            // Création table product
         if ($request->query->get('create_product')) {
             try {
                 $conn->executeStatement("
@@ -47,7 +45,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
                         id INT AUTO_INCREMENT PRIMARY KEY,
                         name VARCHAR(100) NOT NULL,
                         price DOUBLE NOT NULL,
-                        expiry_date DATE NOT NULL,
+                        expiry_date DATE NULL,
                         category_id INT NOT NULL,
                         FOREIGN KEY (category_id) REFERENCES category(id)
                     )
@@ -75,7 +73,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
             $expiry_date = $request->request->get('expiry_date');
             $category_id = $request->request->get('category_id');
 
-            // Récupérer le nom de la catégorie
             $category = $conn->fetchAssociative(
                 "SELECT name FROM category WHERE id = ?",
                 [$category_id]
@@ -83,10 +80,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
             $today = new \DateTime('today');
 
-            // LOGIQUE MÉTIER
             if ($category['name'] !== 'electronique') {
 
-                // Date obligatoire
                 if (empty($expiry_date)) {
                     $message = "❌ La date de péremption est obligatoire pour cette catégorie.";
                 } else {
@@ -98,11 +93,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
                 }
 
             } else {
-                // Électronique → pas de date
                 $expiry_date = null;
             }
 
-            // INSERT seulement si aucune erreur
             if ($message === '') {
                 try {
                     $conn->insert('product', [

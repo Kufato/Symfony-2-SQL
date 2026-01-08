@@ -51,7 +51,6 @@ class UserRegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            // On vérifie si username OU email existe déjà
             $exists = $connection->fetchOne(
                 'SELECT COUNT(*) FROM user WHERE username = ? OR email = ?',
                 [$data['username'], $data['email']]
@@ -69,7 +68,11 @@ class UserRegistrationController extends AbstractController
                         'birthdate' => $data['birthdate']->format('Y-m-d H:i:s'),
                         'address' => $data['address'],
                     ]);
+
                     $message = "✅ Utilisateur ajouté avec succès.";
+
+                    $form = $this->createForm(UserType::class);
+
                 } catch (\Exception $e) {
                     $message = "❌ Erreur lors de l'insertion : " . $e->getMessage();
                 }

@@ -1,0 +1,49 @@
+#########################################
+#               EXECUTION               #
+#########################################
+
+# Verifier si Composer a installer toutes les dependances
+composer install
+
+# Creer la database si non existante
+php bin/console doctrine:database:create
+
+# Nettoyer le cache
+php bin/console cache:clear
+
+# Verifier les routes
+php bin/console debug:router
+
+# Lancer le site (http://127.0.0.1:8000)
+symfony serve
+
+# Connection a la database (root)
+mysql -u root -p
+
+# Selectionner la bonne database
+USE ex**;
+
+# Verifier la table
+DESCRIBE ****;
+
+#########################################
+#               CAS ORM                 #
+#########################################
+
+# Générer les migrations
+php bin/console make:migration
+
+# Exécuter les migrations
+php bin/console doctrine:migrations:migrate
+
+# Verifier si la structure de la base correspond au entitees
+php bin/console doctrine:schema:validate
+
+#########################################
+#               CAS EX12                #
+#########################################
+
+# Fixture pour les categories
+composer require --dev doctrine/doctrine-fixtures-bundle
+php bin/console make:fixture AppFixtures
+php bin/console doctrine:fixtures:load

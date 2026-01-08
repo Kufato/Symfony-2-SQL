@@ -67,8 +67,16 @@ class DeleteOrmController extends AbstractController
     }
 
     #[Route('/ex05/delete/{id}', name: 'ex05_delete')]
-    public function delete(int $id, EntityManagerInterface $em): Response
+    public function delete(string $id, EntityManagerInterface $em): Response
     {
+        // Vérifie que l'ID est un nombre entier
+        if (!ctype_digit($id)) {
+            $this->addFlash('error', "⚠️ L'identifiant doit être un nombre entier.");
+            return $this->redirectToRoute('ex05_list');
+        }
+
+        $id = (int) $id; // Conversion sûre
+
         $user = $em->getRepository(User::class)->find($id);
 
         if (!$user) {

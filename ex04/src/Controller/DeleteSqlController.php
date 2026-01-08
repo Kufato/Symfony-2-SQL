@@ -44,15 +44,26 @@ class DeleteSqlController extends AbstractController
             $email = $request->request->get('email');
 
             if ($name && $email) {
-                try {
-                    $connection->executeStatement(
-                        'INSERT INTO user (name, email) VALUES (?, ?)',
-                        [$name, $email]
-                    );
-                    $message = "✅ Utilisateur ajouté avec succès.";
-                } catch (\Exception $e) {
-                    $message = "❌ Erreur : " . $e->getMessage();
+
+                $exists = $connection->fetchOne(
+                    'SELECT COUNT(*) FROM user WHERE name = ? OR email = ?',
+                    [$name, $email]
+                );
+
+                if ($exists) {
+                    $message = "⚠️ Le nom ou l'email existe déjà, veuillez en choisir un autre.";
+                } else {
+                    try {
+                        $connection->executeStatement(
+                            'INSERT INTO user (name, email) VALUES (?, ?)',
+                            [$name, $email]
+                        );
+                        $message = "✅ Utilisateur ajouté avec succès.";
+                    } catch (\Exception $e) {
+                        $message = "❌ Erreur : " . $e->getMessage();
+                    }
                 }
+
             } else {
                 $message = "⚠️ Merci de remplir tous les champs.";
             }
@@ -80,12 +91,17 @@ class DeleteSqlController extends AbstractController
     }
 
     #[Route('/ex04/delete/{id}', name: 'ex04_delete')]
-    public function delete(int $id, Connection $connection): Response
+    public function delete(string $id, Connection $connection): Response
     {
+        if (!ctype_digit($id)) {
+            $this->addFlash('error', "⚠️ L'identifiant doit être un nombre entier.");
+            return $this->redirectToRoute('ex04_list');
+        }
+
+        $id = (int) $id;
         $message = null;
 
         try {
-            // Vérifie si l'utilisateur existe
             $user = $connection->fetchAssociative('SELECT * FROM user WHERE id = ?', [$id]);
 
             if (!$user) {
@@ -98,7 +114,6 @@ class DeleteSqlController extends AbstractController
             $message = "❌ Erreur : " . $e->getMessage();
         }
 
-        // On redirige vers la liste avec message flash
         $this->addFlash('result', $message);
         return $this->redirectToRoute('ex04_list');
     }

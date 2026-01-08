@@ -20,7 +20,6 @@ class Ex10Controller extends AbstractController
     #[Route('/ex10/create-table', name: 'ex10_create_table')]
     public function createTable(Connection $conn): Response
     {
-        // SQL pur pour créer la table avec toutes les colonnes
         $sql = <<<SQL
         CREATE TABLE IF NOT EXISTS sql_file_data (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -48,16 +47,14 @@ class Ex10Controller extends AbstractController
 
         $content = file_get_contents($filePath);
 
-        // Insert dans SQL pur
         $conn->insert('sql_file_data', [
             'filename' => 'input.txt',
             'content'  => $content,
             'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
         ]);
 
-        // Insert via ORM
         $ormData = new OrmFileData();
-        $ormData->setFilename('file.txt');
+        $ormData->setFilename('input.txt');
         $ormData->setContent($content);
         $ormData->setCreatedAt(new \DateTime());
         $em->persist($ormData);
@@ -71,10 +68,8 @@ class Ex10Controller extends AbstractController
     #[Route('/ex10/view', name: 'ex10_view')]
     public function view(EntityManagerInterface $em, Connection $conn): Response
     {
-        // Données SQL pur, triées par ID asc
         $sqlData = $conn->fetchAllAssociative('SELECT * FROM sql_file_data ORDER BY id ASC');
 
-        // Données ORM, triées par ID asc
         $ormData = $em->getRepository(OrmFileData::class)->findBy([], ['id' => 'ASC']);
 
         return $this->render('ex10/view.html.twig', [

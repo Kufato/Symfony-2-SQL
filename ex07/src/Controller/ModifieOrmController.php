@@ -66,12 +66,18 @@ class ModifieOrmController extends AbstractController
     }
 
     #[Route('/ex07/edit/{id}', name: 'ex07_edit', methods: ['GET', 'POST'])]
-    public function edit(int $id, Request $request, EntityManagerInterface $em): Response
+    public function edit(string $id, Request $request, EntityManagerInterface $em): Response
     {
+        if (!ctype_digit($id)) {
+            $this->addFlash('error', "⚠️ L'identifiant doit être un nombre entier.");
+            return $this->redirectToRoute('ex07_list');
+        }
+        $id = (int) $id;
+
         $user = $em->getRepository(User::class)->find($id);
 
         if (!$user) {
-            $this->addFlash('result', '❌ Utilisateur introuvable.');
+            $this->addFlash('error', '❌ Utilisateur introuvable.');
             return $this->redirectToRoute('ex07_list');
         }
 
@@ -87,13 +93,16 @@ class ModifieOrmController extends AbstractController
                 $message = "⚠️ L'email est invalide.";
             } else {
                 $repo = $em->getRepository(User::class);
-                $exists = $repo->createQueryBuilder('u')
+
+                $qb = $repo->createQueryBuilder('u')
                     ->select('COUNT(u.id)')
                     ->where('(u.name = :name OR u.email = :email)')
                     ->andWhere('u.id != :id')
-                    ->setParameters(['name' => $newName, 'email' => $newEmail, 'id' => $id])
-                    ->getQuery()
-                    ->getSingleScalarResult();
+                    ->setParameter('name', $newName)
+                    ->setParameter('email', $newEmail)
+                    ->setParameter('id', $id);
+
+                $exists = $qb->getQuery()->getSingleScalarResult();
 
                 if ($exists > 0) {
                     $message = "⚠️ Ce nom ou email est déjà pris.";

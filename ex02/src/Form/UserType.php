@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\{
 };
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class UserType extends AbstractType
 {
@@ -17,12 +18,25 @@ class UserType extends AbstractType
             ->add('username', TextType::class)
             ->add('name', TextType::class)
             ->add('email', EmailType::class)
-            ->add('enable', CheckboxType::class, ['required' => false])
+            ->add('enable', CheckboxType::class, [
+                'required' => false
+            ])
             ->add('birthdate', DateType::class, [
                 'widget' => 'single_text',
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'La date de naissance est obligatoire.',
+                    ]),
+                    new Assert\LessThanOrEqual([
+                        'value' => 'today',
+                        'message' => 'La date de naissance doit être antérieure ou égale à aujourd’hui.',
+                    ]),
+                ],
             ])
             ->add('address', TextareaType::class)
-            ->add('save', SubmitType::class, ['label' => 'Ajouter l’utilisateur']);
+            ->add('save', SubmitType::class, [
+                'label' => 'Ajouter l’utilisateur'
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
